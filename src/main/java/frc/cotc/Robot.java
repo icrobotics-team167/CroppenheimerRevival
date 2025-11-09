@@ -12,12 +12,18 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import frc.cotc.swerve.Swerve;
+import frc.cotc.superstructure.Shooter;
+
 import java.io.FileNotFoundException;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -29,6 +35,18 @@ public class Robot extends LoggedRobot {
     SIM,
     REPLAY
   }
+  private LoggedDashboardChooser<Command> autoSelector;
+
+  private final Swerve drivebase; 
+  private final Shooter shooter;
+  // private final LightSubsystem light;
+
+  private CommandJoystick primaryLeftStick = new CommandJoystick(0);
+  private CommandJoystick primaryRightStick = new CommandJoystick(1);
+  private CommandJoystick secondaryLeftStick = new CommandJoystick(2);
+  private CommandJoystick secondaryRightStick = new CommandJoystick(3);
+
+
 
   @SuppressWarnings({"DataFlowIssue", "UnreachableCode", "ConstantValue"})
   public Robot() {
@@ -55,12 +73,47 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("RoboRIO Serial number", serialNumber);
 
         SignalLogger.start(); // Start logging Phoenix CAN signals
+
+        drivebase =
+            new SwerveSubsystem(
+                new GyroIOPigeon2(false),
+                new ModuleIOSparkMax(0),
+                new ModuleIOSparkMax(1),
+                new ModuleIOSparkMax(2),
+                new ModuleIOSparkMax(3));
+        shooter =
+            new Shooter(
+                new FeederIOSparkFlex(),
+                new FlywheelIOSparkFlex(),
+                new PivotIOSparkFlex(),
+                new NoteDetectorIOTimeOfFlight(),
+                new IntakeIOTalonFX(),
+                new LightsIOCANdle(),
+                new ClimberIOTalonFX());
+        // light = new LightSubsystem(new LightsIOBlinkin());
       }
       case SIM -> {
         Logger.addDataReceiver(new WPILOGWriter()); // Log to the project's logs folder
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
 
         SignalLogger.start(); // Start logging Phoenix CAN signals
+
+        drivebase =
+            new SwerveSubsystem(
+                new GyroIO() {},
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim());
+        shooter =
+            new Shooter(
+                new FeederIO() {},
+                new FlywheelIO() {},
+                new PivotIOSim(),
+                new NoteDetectorIO() {},
+                new IntakeIO() {},
+                new LightsIO() {},
+                new ClimberIO() {});
       }
       case REPLAY -> {
         setUseTiming(false); // Run as fast as possible
@@ -81,9 +134,29 @@ public class Robot extends LoggedRobot {
             new WPILOGWriter(
                 LogFileUtil.addPathSuffix(logPath, "_replay"))); // Save outputs to a new log
       }
-    }
+    }//end switch
 
     Logger.start();
+
+    //register commands
+    NamedCommands.registerCommand(
+        "Score in speaker",
+        shooter.getAutoSpeakerShotCommand(() -> drivebase.getPose().getTranslation()));
+    NamedCommands.registerCommand("Aim from subwoofer", shooter.getSubwooferShotCommand());
+    NamedCommands.registerCommand("Aim from podium", shooter.getPodiumShotCommand());
+    NamedCommands.registerCommand("Score note (already aimed)", shooter.shootDuringAuto());
+    NamedCommands.registerCommand("Intake", shooter.autoIntakeNoPivot());
+    NamedCommands.registerCommand("Intake Out", shooter.intakeOut());
+    NamedCommands.registerCommand("Spin up flywheel", shooter.getFlywheelSpinUp());
+
+    // Configure the trigger bindings
+    configureBindings();
+    // System.out.println("Deploy directory: " + Filesystem.getDeployDirectory());
+    autoSelector = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+    autoSelector.addOption(
+        "The One Piece is real",
+        race(shooter.getSubwooferShotCommand(), shooter.getFlywheelSpinUp()));
+
 
     CommandScheduler.getInstance().onCommandInitialize(CommandsLogging::commandStarted);
     CommandScheduler.getInstance().onCommandFinish(CommandsLogging::commandEnded);
@@ -94,6 +167,9 @@ public class Robot extends LoggedRobot {
                   interrupter -> CommandsLogging.runningInterrupters.put(interrupter, interrupted));
               CommandsLogging.commandEnded(interrupted);
             });
+    
+            
+
   }
 
   @Override
