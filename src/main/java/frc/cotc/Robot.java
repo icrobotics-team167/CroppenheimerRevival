@@ -8,14 +8,18 @@
 package frc.cotc;
 
 import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.cotc.superstructure.Superstructure;
 import frc.cotc.swerve.Swerve;
 import java.io.FileNotFoundException;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -89,6 +93,28 @@ public class Robot extends LoggedRobot {
 
     final Swerve drivebase = getDrivebase(mode);
     final Superstructure superstructure = getSuperstructure(mode);
+
+    final CommandXboxController primary = new CommandXboxController(0);
+    final CommandXboxController secondary = new CommandXboxController(1);
+
+    DoubleSupplier primaryLeftForwards = () -> -MathUtil.applyDeadband(primary.getLeftY(), .05);
+    DoubleSupplier primaryLeftSide = () -> -MathUtil.applyDeadband(primary.getLeftX(), .05);
+    DoubleSupplier primaryRightSide = () -> -MathUtil.applyDeadband(primary.getRightX(), .05);
+
+    // If no other command is running, run the teleop drive command
+    drivebase.setDefaultCommand(drivebase.teleopDrive(primaryLeftForwards,
+      primaryLeftSide,
+      primaryRightSide));
+    // While the primary driver is holding the right trigger, aim the drivebase at the speaker
+    primary.rightTrigger().whileTrue(drivebase.aimAtSpeaker(primaryLeftForwards,primaryLeftSide));
+
+    // While the secondary driver is holding the left trigger, intake from the ground
+    secondary.leftTrigger().whileTrue(superstructure.groundIntake());
+    // While the secondary driver is holding the right trigger, aim and shoot into the speaker
+    secondary.rightTrigger().whileTrue(superstructure.shootSpeaker(drivebase::getPose));
+    // Idea: To teach them driver automations and a use for the superstructure class, have them
+    // program a driver automation where if robot has note and is near the speaker, automatically
+    // spin up the flywheels - Tada
 
     CommandScheduler.getInstance().onCommandInitialize(CommandsLogging::commandStarted);
     CommandScheduler.getInstance().onCommandFinish(CommandsLogging::commandEnded);
