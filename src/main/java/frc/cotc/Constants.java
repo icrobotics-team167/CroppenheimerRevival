@@ -7,8 +7,8 @@
 
 package frc.cotc;
 
-//import static edu.wpi.first.units.Units.*;
-//import edu.wpi.first.units.*;
+// import static edu.wpi.first.units.Units.*;
+// import edu.wpi.first.units.*;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -19,10 +19,11 @@ package frc.cotc;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static final class Field {
+  public static final class Field {
     public static final double FIELD_LENGTH_METERS = 16.46;
     public static final double FIELD_WIDTH_METERS = 8.21;
   }
+
   public static final class Driving {
     public static final boolean SLOWMODE_DEFAULT = true;
     public static final double SLOWMODE_MULTIPLIER = 0.2;
