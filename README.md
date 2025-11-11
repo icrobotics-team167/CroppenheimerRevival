@@ -2,20 +2,9 @@ File tree
 ```
 CroppenheimerRevival/
 ├── 📁 .idea/
-│   └── 📁 runConfigurations/
-│       ├── 📄 Build_Robot.xml                 # IntelliJ run config for the `build` Gradle task.
-│       ├── 📄 Build___Deploy_Robot.xml        # IntelliJ run config for the `deploy` Gradle task.
-│       ├── 📄 Build___Run_Simulate_Java.xml   # IntelliJ run config for the `simulateJava` Gradle task.
-│       └── 📄 Clean.xml                      # IntelliJ run config for the `clean` Gradle task.
 ├── 📁 .vscode/
-│   ├── 📄 launch.json                  # VS Code settings for debugging Java code, with targets for both desktop simulation and deploying to the roboRIO.
-│   └── 📄 settings.json                # VS Code workspace settings, configuring the Java environment and hiding common unneeded files.
 ├── 📁 .wpilib/
-│   └── 📄 wpilib_preferences.json        # WPILib-specific settings, storing the team number (167) and FRC year (2025) for GradleRIO.
 ├── 📁 gradle/
-│   └── 📁 wrapper/
-│       ├── 📄 gradle-wrapper.jar        # The Gradle Wrapper executable, ensuring consistent builds for all developers.
-│       └── 📄 gradle-wrapper.properties  # Configuration file specifying the Gradle version to use (8.11).
 ├── 📁 src/main/
 │   ├── 📁 deploy/
 │   │   └── 📄 example.txt               # Any files in this directory are copied to the roboRIO's filesystem (`/home/lvuser/deploy`) during deployment.
@@ -41,12 +30,4 @@ CroppenheimerRevival/
 │   ├── 📄 photonlib-v2025.3.1.json     # Dependency file for the **PhotonVision** vision library.
 │   ├── 📄 REVLib-2025.json             # Dependency file for **REV Robotics'** library (for SPARK Max/Flex, NEO/Vortex).
 │   └── 📄 WPILibNewCommands.json       # Dependency file for the core **WPILib Command-Based Framework**.
-├── 📄 .gitattributes                   # Git config file to enforce Unix-style line endings (`eol=lf`) for consistency across operating systems.
-├── 📄 .gitignore                     # Lists files and directories (like `build/`, `.gradle/`, and IDE settings) that Git should ignore.
-├── 📄 build.gradle                   # The main build script. It uses the **GradleRIO plugin** to manage all project dependencies, tasks, and settings for building, simulating, and deploying the robot code.
-├── 📄 gradlew                        # The Gradle Wrapper executable script for macOS and Linux.
-├── 📄 gradlew.bat                    # The Gradle Wrapper batch script for Windows.
-├── 📄 LICENSE                        # The project's open-source license (MIT License), Copyright (c) 2026 FRC 167.
-├── 📄 settings.gradle                # Gradle settings file that configures the plugin repositories, including the local WPILib Maven cache.
-└── 📄 WPILib-License.md              # The official license file for the WPILib libraries used in this project.
 ```
