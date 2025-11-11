@@ -1,5 +1,5 @@
 File tree
-
+```
 CroppenheimerRevival/
 ├── 📁 .idea/
 │   └── 📁 runConfigurations/
@@ -49,3 +49,4 @@ CroppenheimerRevival/
 ├── 📄 LICENSE                        # The project's open-source license (MIT License), Copyright (c) 2026 FRC 167.
 ├── 📄 settings.gradle                # Gradle settings file that configures the plugin repositories, including the local WPILib Maven cache.
 └── 📄 WPILib-License.md              # The official license file for the WPILib libraries used in this project.
+```
